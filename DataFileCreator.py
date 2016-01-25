@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import mysql.connector
 import datetime
+import os #for current working directory
 import sys #for error catching
 
 #DataFileCreator
@@ -68,7 +69,9 @@ class DataFileCreator:
         self.begTime = datetimes[0]
         self.endTime = datetimes[1]
         self.filename = filename
-        self.filepath = "/home/dnp/code/python/data_requester/dat/"
+        cwd = os.getcwd() #no trailing slash
+        #self.filepath = os.path.join(cwd,'dat','')#adds trailing slash
+        self.filepath = '/tmp/dat/' #can't get file perms to work with above
 
         #make the file, return number of lines written
         return self.executeQuery()
@@ -87,7 +90,8 @@ class DataFileCreator:
     #stores data in file and returns number of data points
     def executeQuery(self):
 
-        qfn= "'"+self.filepath+self.filename+"'" #qfn="quoted file name"
+        output = self.filepath+self.filename
+        print(output)
         begTimeSQL = self.begTime.strftime('%Y-%m-%d %H:%M:%S')
         endTimeSQL = self.endTime.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -102,18 +106,16 @@ class DataFileCreator:
             WHERE device IN (%s)
             AND (created_at BETWEEN '%s' AND '%s')
             ORDER BY created_at DESC
-            INTO OUTFILE %s
+            INTO OUTFILE '%s'
             FIELDS TERMINATED BY ','
             LINES TERMINATED BY '\\n';
-            """ % (placeholders,begTimeSQL,endTimeSQL,qfn)
-        #print(self.devices)
-        #print(query)
+            """ % (placeholders,begTimeSQL,endTimeSQL,output)
         try:
             cur.execute(query,self.devices)
             self.nLines = cur.rowcount
         except:#generic error catcher:https://wiki.python.org/moin/HandlingExceptions
             e = sys.exc_info()[0]
-            print("Failed to execute query: %s\n\nError Message:%s",(qfn,e))
+            print("Failed to execute query: %s\n\nError Message:%s",(query,e))
             exit()
 
     def getNLines(self):
@@ -131,7 +133,7 @@ class DataFileCreator:
 
 if __name__ == "__main__":
     device_set = set(['dev1','dev3'])
-    timestamps = ['2015-01-19 00:00:01','2016-01-12 17:52:00']
+    timestamps = ['2015-01-25 00:00:01','2016-01-25 09:38:00']
     file_creator = DataFileCreator(device_set,timestamps)
     print(file_creator.getFileName())
     print(file_creator.getNLines())

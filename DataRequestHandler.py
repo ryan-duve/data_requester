@@ -21,6 +21,7 @@ class DataRequestHandler:
 
     def makeDataPreview(self):
         data_filename = self.fc.getFilePath()+self.fc.getFileName()
+        print('data_filename=%s'%data_filename)
         #check existence of data file
         if not os.path.isfile(data_filename):
             print("File not found: '%s'\n" % data_filename)
@@ -36,7 +37,7 @@ class DataRequestHandler:
 
 if __name__ == "__main__":
     create_data_preview = True
-    drh = DataRequestHandler(set(['dev1','dev3']),['2015-01-19 00:00:01','2016-01-11 17:52:00'])
+    drh = DataRequestHandler(set(['dev1','dev3']),['2016-01-25 00:00:01','2016-01-25 10:52:00'])
     if create_data_preview:
         print("creating data preview")
     drh.makeDataPreview()
